@@ -23,15 +23,22 @@ public class GameController {
     }
 
     @PostMapping(value = "/join")
-    public HttpEntity<Game> gameJoin(@RequestParam("playerId")String playerId){
+    public HttpEntity<Game> gameJoin(@RequestParam("playerId") String playerId) {
         return new ResponseEntity<>(flowService.joinFirstAvailableGameOrCreateOne(playerId), HttpStatus.OK);
     }
 
     @PostMapping(value = "/move")
-    public HttpEntity<Game> gameMove(@RequestParam("number")Integer number,
-                                     @RequestParam("playerId")String playerId,
-                                     @RequestParam("gameId")String gameId){
+    public HttpEntity<Game> gameMove(@RequestParam("number") Integer number,
+                                     @RequestParam("playerId") String playerId,
+                                     @RequestParam("gameId") String gameId) {
         return new ResponseEntity<>(flowService.makeMove(number, playerId, gameId), HttpStatus.OK);
+
+    }
+
+    @PostMapping(value = "/terminate")
+    public HttpEntity<Game> gameTerminate(@RequestParam("playerId") String playerId,
+                                          @RequestParam("gameId") String gameId) {
+        return new ResponseEntity<>(flowService.terminateGame(playerId, gameId), HttpStatus.OK);
 
     }
 

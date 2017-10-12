@@ -82,4 +82,13 @@ public class FlowService {
     }
 
 
+    public Game terminateGame(String playerId, String gameId) {
+        Game game = gameService.retrieveById(gameId);
+        if (game.getFinished() == null) {
+            game.setFinished(LocalDateTime.now());
+            String winnerId = playerId.equalsIgnoreCase(game.getPlayerOneId()) ? game.getPlayerTwoId() : game.getPlayerOneId();
+            game.setWinnerPlayerId(winnerId);
+        }
+        return gameService.save(game);
+    }
 }

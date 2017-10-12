@@ -15,13 +15,12 @@ var stompClient = null;
 var username = null;
 var gameId = null;
 var isGameCreated = false;
-var newNumber = new Number(0);
-var oldNumber = new Number(0);
-var min = new Number(0);
-var max = new Number(0);
-var one = new Number(1);
+var newNumber = Number(0);
+var oldNumber = Number(0);
+var min = Number(0);
+var max = Number(0);
+var one = Number(1);
 var tpid = null;
-var finished = null;
 var winnerPlayerId = null;
 
 
@@ -40,7 +39,7 @@ var cnnct = function connect(event) {
         stompClient.connect({}, onConnected, onError);
     }
     event.preventDefault();
-}
+};
 
 function onConnected() {
     console.log('connected dws');
@@ -87,7 +86,7 @@ function joinGame() {
         dataType: 'json',
         success: function (data) {
             gameId = data.id;
-            tpid=data.turnPlayerId;
+            tpid = data.turnPlayerId;
             console.log('connected game id -->' + gameId);
             alertMove.classList.add('hidden');
             alertMove2.classList.add('hidden');
@@ -112,8 +111,8 @@ function joinGame() {
 
 var mv = function move() {
     var number = document.getElementById("inp-number").value;
-    var numberNumb = new Number(document.getElementById("inp-number").value);
-    if (!(numberNumb == oldNumber || numberNumb + one == oldNumber || numberNumb - one == oldNumber)) {
+    var numberNumb = Number(document.getElementById("inp-number").value);
+    if (!(numberNumb === oldNumber || numberNumb + one === oldNumber || numberNumb - one === oldNumber)) {
         document.getElementById("inp-number").value = oldNumber;
         alert("check number, plus 1 or minus 1");
     } else {
@@ -130,9 +129,9 @@ var mv = function move() {
                 console.log("make a move: " + number);
                 alertMove.classList.add('hidden');
                 alertMove2.classList.add('hidden');
-                if(data.finished!=null){
+                if (data.finished !== null) {
                     stompClient.send("/ws/divider/" + gameId + "/game.finish/" + data.winnerPlayerId);
-                }else{
+                } else {
                     stompClient.send("/ws/divider/" + gameId + "/game.move/" + data.lastMove.number);
                     stompClient.send("/ws/divider/" + gameId + "/game.turn/" + data.turnPlayerId);
                 }
@@ -145,12 +144,33 @@ var mv = function move() {
     }
 };
 
+function terminateGame() {
+    $.ajax({
+        url: '/game/terminate',
+        type: "POST",
+        data: {
+            playerId: username,
+            gameId: gameId
+        },
+        dataType: 'json',
+        success: function (data) {
+            console.log("game terminated: " + gameId + " " + data.id
+            )
+            ;
+        },
+        error: function handleError() {
+            alertMove.classList.remove('hidden');
+            alertMove2.classList.remove('hidden');
+        }
+    });
+}
+
 var plsN = function plusOne() {
     console.log('plusOne');
     console.log(max);
     alertMove.classList.add('hidden');
     alertMove2.classList.add('hidden');
-    var numberNumb = new Number(document.getElementById("inp-number").value);
+    var numberNumb = Number(document.getElementById("inp-number").value);
     if (numberNumb + one > max) {
         alert('plus one minus one');
     } else {
@@ -163,7 +183,7 @@ var mnsN = function minusOne() {
     console.log(min);
     alertMove.classList.add('hidden');
     alertMove2.classList.add('hidden');
-    var numberNumb = new Number(document.getElementById("inp-number").value);
+    var numberNumb = Number(document.getElementById("inp-number").value);
     if (numberNumb - one < min) {
         alert('plus one minus one');
     } else {
@@ -173,6 +193,7 @@ var mnsN = function minusOne() {
 
 
 function onError(error) {
+    terminateGame();
     console.log('not connected dws ' + error);
     stompClient.disconnect();
 }
@@ -198,9 +219,9 @@ function onFinishReceived(payload) {
     console.log('newNumber -->' + payload.body);
     winnerPlayerId = payload.body;
     chatPage.classList.add('hidden');
-    if (winnerPlayerId == username) {
+    if (winnerPlayerId === username) {
         winPage.classList.remove('hidden');
-    } else{
+    } else {
         lostPage.classList.remove('hidden');
     }
 }
@@ -209,9 +230,9 @@ function onTurnReceived(payload) {
     console.log(payload.body);
     console.log('newNumber -->' + payload.body);
     tpid = payload.body;
-    if (tpid == username) {
+    if (tpid === username) {
         $("#moveButton").prop("disabled", false).off('click');
-    } else{
+    } else {
         $("#moveButton").prop("disabled", true).off('click');
     }
 }

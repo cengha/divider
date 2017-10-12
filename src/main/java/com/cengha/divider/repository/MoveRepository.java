@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface MoveRepository extends CrudRepository<Move,String> {
 
-    public List<Move> getAllByGameId(String gameId);
+    List<Move> getAllByGameId(String gameId);
 }
