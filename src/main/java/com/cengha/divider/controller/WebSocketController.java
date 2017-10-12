@@ -1,9 +1,5 @@
 package com.cengha.divider.controller;
 
-import com.cengha.divider.model.Game;
-import com.cengha.divider.model.User;
-import com.cengha.divider.spring.annotation.ActiveGame;
-import com.cengha.divider.spring.annotation.ActiveUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;

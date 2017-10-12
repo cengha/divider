@@ -1,6 +1,5 @@
 package com.cengha.divider.service;
 
-import com.cengha.divider.exception.NoSuchActiveUserException;
 import com.cengha.divider.model.Role;
 import com.cengha.divider.model.User;
 import com.cengha.divider.model.UserRole;

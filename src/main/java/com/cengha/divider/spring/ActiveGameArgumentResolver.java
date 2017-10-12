@@ -4,7 +4,6 @@ import com.cengha.divider.model.User;
 import com.cengha.divider.service.GameService;
 import com.cengha.divider.service.UserService;
 import com.cengha.divider.spring.annotation.ActiveGame;
-import com.cengha.divider.spring.annotation.ActiveUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
