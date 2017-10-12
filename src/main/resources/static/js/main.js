@@ -8,6 +8,7 @@ var usernameButton = document.querySelector('#usernameButton');
 var moveButton = document.querySelector('#moveButton');
 var plusOneButton = document.querySelector('#btnPlus');
 var minusOneButton = document.querySelector('#btnMinus');
+var simulate = document.querySelector('#simulate');
 var alertMove = document.querySelector('#alert-move');
 var alertMove2 = document.querySelector('#alert-move2');
 
@@ -22,6 +23,7 @@ var max = Number(0);
 var one = Number(1);
 var tpid = null;
 var winnerPlayerId = null;
+var finished = false;
 
 
 var cnnct = function connect(event) {
@@ -211,9 +213,17 @@ function onNumberReceived(payload) {
     oldNumber = Number(payload.body);
     min = Number(payload.body) - 1;
     max = Number(payload.body) + 1;
+    if (!finished) {
+        if (simulate.checked) {
+            document.getElementById("inp-number").value = (newNumber + one) % 3 === 0 ?
+                newNumber + one : (newNumber - one) % 3 === 0 ? newNumber - one : newNumber;
+            mv();
+        }
+    }
 }
 
 function onFinishReceived(payload) {
+    finished = true;
     $("#moveButton").prop("disabled", true).off('click');
     console.log(payload.body);
     console.log('newNumber -->' + payload.body);
