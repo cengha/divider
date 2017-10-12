@@ -15,7 +15,7 @@
         <file>logs/controller.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/archive/controller/controller_log.%d{yyyy-MM-dd-HH-mm}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
+            <maxHistory>300</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>

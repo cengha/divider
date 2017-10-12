@@ -213,13 +213,6 @@ function onNumberReceived(payload) {
     oldNumber = Number(payload.body);
     min = Number(payload.body) - 1;
     max = Number(payload.body) + 1;
-    if (!finished) {
-        if (simulate.checked) {
-            document.getElementById("inp-number").value = (newNumber + one) % 3 === 0 ?
-                newNumber + one : (newNumber - one) % 3 === 0 ? newNumber - one : newNumber;
-            mv();
-        }
-    }
 }
 
 function onFinishReceived(payload) {
@@ -242,6 +235,13 @@ function onTurnReceived(payload) {
     tpid = payload.body;
     if (tpid === username) {
         $("#moveButton").prop("disabled", false).off('click');
+        if (!finished) {
+            if (simulate.checked) {
+                document.getElementById("inp-number").value = (newNumber + one) % 3 === 0 ?
+                    newNumber + one : (newNumber - one) % 3 === 0 ? newNumber - one : newNumber;
+                mv();
+            }
+        }
     } else {
         $("#moveButton").prop("disabled", true).off('click');
     }
