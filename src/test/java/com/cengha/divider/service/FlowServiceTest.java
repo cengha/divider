@@ -14,29 +14,31 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
-public class GameServiceTest {
+public class FlowServiceTest {
 
 
     @MockBean
-    public GameRepository gameRepository;
-
     public GameService gameService;
+
+    @MockBean
+    public MoveService moveService;
+
+    public FlowService flowService;
 
     @Before
     public void setUp() throws Exception {
-        gameService=new GameService(gameRepository);
+        flowService = new FlowService(gameService, moveService);
 
         Game game = new Game("p1");
         Optional<Game> optional = Optional.of(game);
-        Mockito.when(gameRepository
-                .getByPlayerOneIdOrPlayerTwoIdAndFinishedIsNull(game.getPlayerOneId(), game.getPlayerOneId()))
+        Mockito.when(gameService.getFirstByFinishedIsNull())
                 .thenReturn(optional);
     }
 
     @Test
-    public void getFirstByPlayerOneIdOrPlayerTwoIdTest() {
+    public void joinFirstAvailableGameOrCreateOneTest() {
         String p1 = "p1";
-        Game found = gameService.getFirstByPlayerOneIdOrPlayerTwoId(p1);
+        Game found = flowService.joinFirstAvailableGameOrCreateOne(p1);
 
         assertEquals(found.getPlayerOneId(), p1);
     }
