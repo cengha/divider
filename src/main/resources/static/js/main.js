@@ -2,6 +2,8 @@
 
 var usernamePage = document.querySelector('#username-page');
 var chatPage = document.querySelector('#number-page');
+var winPage = document.querySelector('#win-page');
+var lostPage = document.querySelector('#lost-page');
 var usernameButton = document.querySelector('#usernameButton');
 var moveButton = document.querySelector('#moveButton');
 var plusOneButton = document.querySelector('#btnPlus');
@@ -19,6 +21,8 @@ var min = new Number(0);
 var max = new Number(0);
 var one = new Number(1);
 var tpid = null;
+var finished = null;
+var winnerPlayerId = null;
 
 
 var cnnct = function connect(event) {
@@ -42,11 +46,11 @@ function onConnected() {
     console.log('connected dws');
 
     //join a game
-    joinGame(username);
+    joinGame();
 
 }
 
-function subscribeChannels(gameId, username) {
+function subscribeChannels() {
     // Subscribe to the Private Personal Channel
     stompClient.subscribe('/ws/channel/game/' + gameId, onMessageReceived);
 
@@ -56,16 +60,23 @@ function subscribeChannels(gameId, username) {
     //Subscribe to the Number Channel
     stompClient.subscribe('/ws/channel/game/' + gameId + '/number', onNumberReceived);
 
+    //Subscribe to the Finish Channel
+    stompClient.subscribe('/ws/channel/game/' + gameId + '/finish', onFinishReceived);
+
+    //Subscribe to the Turn Channel
+    stompClient.subscribe('/ws/channel/game/' + gameId + '/turn', onTurnReceived);
+
     console.log('isGameCreated: ' + isGameCreated);
     if (isGameCreated) {
         stompClient.send("/ws/divider/" + gameId + "/game.start");
         stompClient.send("/ws/divider/" + gameId + "/game.move/" + newNumber);
+        stompClient.send("/ws/divider/" + gameId + "/game.turn/" + tpid);
     } else {
         stompClient.send("/ws/divider/" + gameId + "/game.created/" + username);
     }
 }
 
-function joinGame(username) {
+function joinGame() {
     console.log('rest join call, username-->' + username);
     $.ajax({
         url: '/game/join',
@@ -76,6 +87,7 @@ function joinGame(username) {
         dataType: 'json',
         success: function (data) {
             gameId = data.id;
+            tpid=data.turnPlayerId;
             console.log('connected game id -->' + gameId);
             alertMove.classList.add('hidden');
             alertMove2.classList.add('hidden');
@@ -84,17 +96,12 @@ function joinGame(username) {
                 oldNumber = data.lastMove.number;
                 min = Number(data.lastMove.number) - 1;
                 max = Number(data.lastMove.number) + 1;
-                tpid = data.turnPlayerId;
-                if (tpid != username) {
-                    $("#moveButton").prop("disabled", true).off('click');
-                } else {
-                    $("#moveButton").prop("disabled", false).off('click');
-                }
+                stompClient.send("/ws/divider/" + gameId + "/game.turn/" + data.turnPlayerId);
             }
             if (data.created !== null) {
                 isGameCreated = true;
             }
-            subscribeChannels(gameId, username);
+            subscribeChannels();
         },
         error: function () {
             alertMove.classList.remove('hidden');
@@ -123,13 +130,12 @@ var mv = function move() {
                 console.log("make a move: " + number);
                 alertMove.classList.add('hidden');
                 alertMove2.classList.add('hidden');
-                tpid = data.turnPlayerId;
-                if (tpid != username) {
-                    $("#moveButton").prop("disabled", true).off('click');
-                } else {
-                    $("#moveButton").prop("disabled", false).off('click');
+                if(data.finished!=null){
+                    stompClient.send("/ws/divider/" + gameId + "/game.finish/" + data.winnerPlayerId);
+                }else{
+                    stompClient.send("/ws/divider/" + gameId + "/game.move/" + data.lastMove.number);
+                    stompClient.send("/ws/divider/" + gameId + "/game.turn/" + data.turnPlayerId);
                 }
-                stompClient.send("/ws/divider/" + gameId + "/game.move/" + data.lastMove.number);
             },
             error: function handleError() {
                 alertMove.classList.remove('hidden');
@@ -177,7 +183,6 @@ function onMessageReceived(payload) {
 }
 
 function onNumberReceived(payload) {
-    $("#moveButton").prop("disabled", false).off('click');
     console.log(payload.body);
     console.log('newNumber -->' + payload.body);
     document.getElementById("inp-number").value = payload.body;
@@ -185,6 +190,30 @@ function onNumberReceived(payload) {
     oldNumber = Number(payload.body);
     min = Number(payload.body) - 1;
     max = Number(payload.body) + 1;
+}
+
+function onFinishReceived(payload) {
+    $("#moveButton").prop("disabled", true).off('click');
+    console.log(payload.body);
+    console.log('newNumber -->' + payload.body);
+    winnerPlayerId = payload.body;
+    chatPage.classList.add('hidden');
+    if (winnerPlayerId == username) {
+        winPage.classList.remove('hidden');
+    } else{
+        lostPage.classList.remove('hidden');
+    }
+}
+
+function onTurnReceived(payload) {
+    console.log(payload.body);
+    console.log('newNumber -->' + payload.body);
+    tpid = payload.body;
+    if (tpid == username) {
+        $("#moveButton").prop("disabled", false).off('click');
+    } else{
+        $("#moveButton").prop("disabled", true).off('click');
+    }
 }
 
 

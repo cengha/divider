@@ -1,11 +1,13 @@
 package com.cengha.divider.service;
 
+import com.cengha.divider.exception.GameFinishedException;
 import com.cengha.divider.exception.IllegalNumberException;
 import com.cengha.divider.exception.NotYourTurnException;
 import com.cengha.divider.model.Game;
 import com.cengha.divider.model.Move;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,17 +54,24 @@ public class FlowService {
     @Transactional
     public Game makeMove(Integer number, String playerId, String gameId) {
         Game game = gameService.retrieveById(gameId);
-        if(!game.getTurnPlayerId().equalsIgnoreCase(playerId)){
+        if (game.getFinished() != null) {
+            throw new GameFinishedException();
+        }
+        if (!game.getTurnPlayerId().equalsIgnoreCase(playerId)) {
             throw new NotYourTurnException();
         }
         List<Move> allByGameId = moveService.getAllByGameId(gameId);
         Integer lastMove = allByGameId.get(allByGameId.size() - 1).getNumber();
         Integer plusOne = lastMove + 1;
         Integer minusOne = lastMove - 1;
-        if (number % 3 != 0 || !(number.equals(plusOne) || number.equals(minusOne))) {
+        if (number % 3 != 0 || !(number.equals(lastMove) || number.equals(plusOne) || number.equals(minusOne))) {
             throw new IllegalNumberException();
         }
         Move move = moveService.save(number / 3, playerId, gameId);
+        if (move.getNumber().equals(1)) {
+            game.setFinished(LocalDateTime.now());
+            game.setWinnerPlayerId(playerId);
+        }
         allByGameId.add(move);
         game.setMoves(allByGameId);
         game.setLastMove(move);

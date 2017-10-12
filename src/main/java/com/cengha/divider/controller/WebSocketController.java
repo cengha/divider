@@ -32,10 +32,22 @@ public class WebSocketController {
                 "Connected and waiting for an opponent!");
     }
 
+    @MessageMapping("/{gameId}/game.turn/{turnPlayerId}")
+    public void notifyPlayerOpponentTurn(@DestinationVariable String turnPlayerId,
+                                         @DestinationVariable String gameId) {
+        messagingTemplate.convertAndSend("/ws/channel/game/" + gameId + "/turn", turnPlayerId);
+    }
+
     @MessageMapping("/{gameId}/game.move/{number}")
     public void notifyPlayerOpponentMove(@DestinationVariable String number,
                                          @DestinationVariable String gameId) {
         messagingTemplate.convertAndSend("/ws/channel/game/" + gameId + "/number", number);
+    }
+
+    @MessageMapping("/{gameId}/game.finish/{winnerPlayerId}")
+    public void notifyPlayerOpponentFinished(@DestinationVariable String winnerPlayerId,
+                                         @DestinationVariable String gameId) {
+        messagingTemplate.convertAndSend("/ws/channel/game/" + gameId + "/finish", winnerPlayerId);
     }
 
 
